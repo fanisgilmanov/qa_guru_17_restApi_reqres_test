@@ -1,31 +1,46 @@
 package tests;
 
+import io.restassured.RestAssured;
+import models.lombok.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static specs.ReqresCreateUpdateSpecs.*;
+import static specs.ReqresGetSpecs.*;
+import static specs.ReqresLoginSpecs.loginResponseSpec;
+import static specs.ReqresLoginSpecs.loginSpec;
 
 public class ReqresTest {
+    @BeforeAll
+    static void setUp(){
+        RestAssured.baseURI = "https://reqres.in/api";
+    }
+
 
     @Test
     @DisplayName("Проверка GET запроса SINGLE USER")
     void singleUserTest(){
-        given()
-                .log().uri()
-                .log().body()
+
+        ReqresResponseGetModels response = given()
+                .spec(singleUserSpecs)
                 .when()
-                .get("https://reqres.in/api/users?page=2")
+                .get()
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(200)
-                .body("page", is(2))
-                .body("per_page", is(6))
-                .body("total", is(12))
-                .body("total_pages", is(2));
+                .spec(singleUserResponseSpecs)
+                .extract().as(ReqresResponseGetModels.class);
+
+
+        assertThat(response.getPage()).isEqualTo("1");
+        assertThat(response.getPer_page()).isEqualTo("6");
+        assertThat(response.getTotal()).isEqualTo("12");
+        assertThat(response.getTotal_pages()).isEqualTo("2");
+
     }
 
 
@@ -33,81 +48,75 @@ public class ReqresTest {
     @DisplayName("Проверка GET запроса SINGLE USER NOT FOUND")
     void singleUserNotFoundTest(){
         given()
-                .log().uri()
-                .log().body()
+                .spec(singleUserNotFoundSpecs)
                 .when()
-                .get("https://reqres.in/api/users/23")
+                .get()
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(404);
+                .spec(singleUserNotFoundResponseSpecs);
     }
 
     @Test
     @DisplayName("Проверка POST запроса CREATE")
     void createUserTest(){
-        String bodyUser = "{\n" +
-                "\"name\": \"morpheus23\",\n" +
-                "\"job\": \"leader12\"\n" +
-                "}";
+        ReqresRequestCreateUpdateModels body = new ReqresRequestCreateUpdateModels();
+        body.setName("morpheus23");
+        body.setJob("leader12");
 
-        given()
-                .log().uri()
-                .log().body()
-                .contentType(JSON)
-                .body(bodyUser)
+        ReqresResponseCreateUpdateModels responsePost = given()
+                .spec(createUpdateSpec)
+                .body(body)
                 .when()
-                .post("https://reqres.in/api/users/")
+                .post()
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(201)
-                .body("name", is("morpheus23"))
-                .body("job", is("leader12"));
+                .spec(createResponseSpec)
+                .extract()
+                .as(ReqresResponseCreateUpdateModels.class);
+
+        assertThat(responsePost.getName()).isEqualTo("morpheus23");
+        assertThat(responsePost.getJob()).isEqualTo("leader12");;
     }
 
     @Test
     @DisplayName("Проверка PUT запроса UPDATE")
     void updateUserTest(){
-        String bodyUser = "{\n" +
-                "\"name\": \"morphe-12\",\n" +
-                "\"job\": \"team-leader12\"\n" +
-                "}";
+        ReqresRequestCreateUpdateModels body = new ReqresRequestCreateUpdateModels();
+        body.setName("morpheus-323");
+        body.setJob("team-leader12");
 
-        given()
-                .log().uri()
-                .log().body()
-                .contentType(JSON)
-                .body(bodyUser)
+        ReqresResponseCreateUpdateModels responsePut = given()
+                .spec(createUpdateSpec)
+                .body(body)
                 .when()
-                .put("https://reqres.in/api/users/")
+                .put()
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(200)
-                .body("name", is("morphe-12"))
-                .body("job", is("team-leader12"));
+                //.spec(updateResponseSpec)
+                .extract()
+                .as(ReqresResponseCreateUpdateModels.class);
+
+        assertThat(responsePut.getName()).isEqualTo("morpheus-323");
+        assertThat(responsePut.getJob()).isEqualTo("team-leader12");
     }
     @Test
     @DisplayName("Проверка POST запроса  LOGIN - SUCCESSFUL ")
     void loginSuccessfulTest(){
-        String bodyUser = "{\n" +
-                "    \"email\": \"eve.holt@reqres.in\",\n" +
-                "    \"password\": \"cityslicka\"\n" +
-                "}";
+        ReqresRequestModels body = new ReqresRequestModels();
+        body.setEmail("eve.holt@reqres.in");
+        body.setPassword("cityslicka");
 
-        given()
-                .log().uri()
-                .log().body()
-                .contentType(JSON)
-                .body(bodyUser)
+        ReqresResponseModels response = given()
+                .spec(loginSpec)
+                .body(body)
                 .when()
-                .post("https://reqres.in/api/login/")
+                .post()
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(200)
-                .body("token", is("QpwL5tke4Pnpja7X4"));
+                .spec(loginResponseSpec)
+                .extract()
+                .as(ReqresResponseModels.class);
+
+        assertThat(response.getToken()).isEqualTo("QpwL5tke4Pnpja7X4");
+
+
+
 
     }
 
