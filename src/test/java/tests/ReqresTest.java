@@ -18,14 +18,14 @@ import static specs.ReqresLoginSpecs.loginSpec;
 
 public class ReqresTest {
     @BeforeAll
-    static void setUp(){
+    static void setUp() {
         RestAssured.baseURI = "https://reqres.in/api";
     }
 
 
     @Test
     @DisplayName("Проверка GET запроса SINGLE USER")
-    void singleUserTest(){
+    void singleUserTest() {
 
         ReqresResponseGetModels response = given()
                 .spec(singleUserSpecs)
@@ -46,7 +46,7 @@ public class ReqresTest {
 
     @Test
     @DisplayName("Проверка GET запроса SINGLE USER NOT FOUND")
-    void singleUserNotFoundTest(){
+    void singleUserNotFoundTest() {
         given()
                 .spec(singleUserNotFoundSpecs)
                 .when()
@@ -57,7 +57,7 @@ public class ReqresTest {
 
     @Test
     @DisplayName("Проверка POST запроса CREATE")
-    void createUserTest(){
+    void createUserTest() {
         ReqresRequestCreateUpdateModels body = new ReqresRequestCreateUpdateModels();
         body.setName("morpheus23");
         body.setJob("leader12");
@@ -73,12 +73,13 @@ public class ReqresTest {
                 .as(ReqresResponseCreateUpdateModels.class);
 
         assertThat(responsePost.getName()).isEqualTo("morpheus23");
-        assertThat(responsePost.getJob()).isEqualTo("leader12");;
+        assertThat(responsePost.getJob()).isEqualTo("leader12");
+        ;
     }
 
     @Test
     @DisplayName("Проверка PUT запроса UPDATE")
-    void updateUserTest(){
+    void updateUserTest() {
         ReqresRequestCreateUpdateModels body = new ReqresRequestCreateUpdateModels();
         body.setName("morpheus-323");
         body.setJob("team-leader12");
@@ -96,9 +97,10 @@ public class ReqresTest {
         assertThat(responsePut.getName()).isEqualTo("morpheus-323");
         assertThat(responsePut.getJob()).isEqualTo("team-leader12");
     }
+
     @Test
     @DisplayName("Проверка POST запроса  LOGIN - SUCCESSFUL ")
-    void loginSuccessfulTest(){
+    void loginSuccessfulTest() {
         ReqresRequestModels body = new ReqresRequestModels();
         body.setEmail("eve.holt@reqres.in");
         body.setPassword("cityslicka");
@@ -114,8 +116,6 @@ public class ReqresTest {
                 .as(ReqresResponseModels.class);
 
         assertThat(response.getToken()).isEqualTo("QpwL5tke4Pnpja7X4");
-
-
 
 
     }
