@@ -10,6 +10,7 @@ import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static specs.ReqresCreateUpdateSpecs.*;
 import static specs.ReqresGetSpecs.*;
@@ -22,6 +23,20 @@ public class ReqresTest {
         RestAssured.baseURI = "https://reqres.in/api";
     }
 
+
+
+    @Test
+    @DisplayName("Проверка GET запроса SINGLE USER (GROOVY)")
+    void checkUsersEmail(){
+        given()
+                .spec(singleUserSpecs)
+                .when()
+                .get("")
+                .then()
+                .spec(singleUserResponseSpecs)
+                .body("data.findAll{it.email =~/.*?@reqres.in/}.email.flatten()",
+                        hasItem("janet.weaver@reqres.in"));
+    }
 
     @Test
     @DisplayName("Проверка GET запроса SINGLE USER")
